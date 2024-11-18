@@ -1,47 +1,46 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import { ref, onMounted } from 'vue'
+import api from './plugins/axios'
+
+const moviesGenres = ref([])
+const TVGenres = ref([])
+
+onMounted(async () => {
+  let response = await api.get('genre/movie/list?language=pt-BR')
+  moviesGenres.value = response.data.genres
+  response = await api.get('genre/tv/list?language-pt-BR')
+  TVGenres.value = response.data.genres
+})
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
+    <nav>
+      <router-link to="/">Home</router-link>
+      <router-link to="/filmes">Filmes</router-link>
+      <router-link to="/tv">Programas de TV</router-link>
+    </nav>
   </header>
-
   <main>
-    <TheWelcome />
+    <router-view />
   </main>
 </template>
 
 <style scoped>
 header {
-  line-height: 1.5;
+  display: flex;
+  height: 3rem;
+  background-color: black;
+  padding-left: 2rem;
+  font-size: 1.5rem;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 }
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+nav a {
+  text-decoration: none;
+  color: white;
 }
 </style>
