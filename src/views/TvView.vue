@@ -1,28 +1,32 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import api from '@/plugins/axios'
-import Loading from 'vue-loading-overlay'
+import { ref, onMounted } from 'vue';
+import api from '@/plugins/axios';
+import Loading from 'vue-loading-overlay';
+import { useGenreStore } from '@/stores/genres';
 
-const isLoading = ref(false)
-const genres = ref([])
+const genreStore = useGenreStore();
+const isLoading = ref(false);
+const tvShows = ref([]);
 
 onMounted(async () => {
-  const response = await api.get('genre/tv/list?language=pt-BR')
-  genres.value = response.data.genres
-})
+  isLoading.value = true;
+  await genreStore.getAllGenres('tv');
+  isLoading.value = false;
+});
 
-const tvShows = ref([])
+const formatDate = (date) => new Date(date).toLocaleDateString('pt-BR');
 
 const listTvShows = async (genreId) => {
-  isLoading.value = true
+  genreStore.setCurrentGenreId(genreId);
+  isLoading.value = true;
   const response = await api.get('discover/tv', {
     params: {
       with_genre: genreId,
       language: 'pt-BR',
     },
   })
-  tvShows.value = response.data.results
-  isLoading.value = false
+  tvShows.value = response.data.results;
+  isLoading.value = false;
 }
 </script>
 
@@ -30,7 +34,7 @@ const listTvShows = async (genreId) => {
   <div class="container">
     <h1>Gêneros de programas de TV</h1>
     <ul class="genre-list">
-      <li v-for="genre in genres" :key="genre.id" class="genre-item" @click="listTvShows(genre.id)">
+      <li v-for="genre in genreStore.genres" :key="genre.id" class="genre-item" :class="{ active: genre.id === genreStore.currentGenreId }" @click="listTvShows(genre.id)">
         {{ genre.name }}
       </li>
     </ul>
@@ -41,8 +45,8 @@ const listTvShows = async (genreId) => {
         <div class="show-details">
           <p class="show-title">{{ show.name }}</p>
           <p class="show-original-name">{{ show.original_name }}</p>
-          <p class="show-release-date">{{ show.first_air_date }}</p>
-          <p>{{ show.genre_ids }}</p>
+          <p class="show-release-date">{{ formatDate(show.first_air_date) }}</p>
+          <p class="show-genres" :class="{ active: genre_id === genreStore.currentGenreId }"><span v-for="genre_id in show.genre_ids" :key="genre_id" @click="listTvShows(genre_id)">{{ genreStore.getGenreName(genre_id) }}</span></p>
         </div>
       </div>
     </div>
@@ -57,6 +61,7 @@ const listTvShows = async (genreId) => {
   flex-direction: column;
   gap: 2rem;
 }
+
 .genre-list {
   display: flex;
   justify-content: center;
@@ -110,5 +115,48 @@ const listTvShows = async (genreId) => {
   font-weight: bold;
   line-height: 1.3rem;
   height: 3rem;
+}
+
+.show-genres {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.2rem;
+}
+
+.show-genres span {
+  background-color: #4f8e9e;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: 100ms ease-in-out;
+}
+
+.show-genres span:hover {
+  cursor: pointer;
+  background-color: #427785;
+}
+
+.active {
+  color: #b3854a;
+  background-color: white;
+  font-weight: bolder;
+  box-shadow: 2px 2px 2px #0000003a;
+}
+
+.active:hover {
+  background-color: #b3854a;
+  color: white;
+}
+
+.movie-genres span.active {
+  color: #b3854a;
+  background-color: white;
+  font-weight: bolder;
 }
 </style>
