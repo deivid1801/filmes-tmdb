@@ -21,7 +21,7 @@ const listTvShows = async (genreId) => {
   isLoading.value = true;
   const response = await api.get('discover/tv', {
     params: {
-      with_genre: genreId,
+      with_genres: genreId,
       language: 'pt-BR',
     },
   })
