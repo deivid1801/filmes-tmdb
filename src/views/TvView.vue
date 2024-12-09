@@ -32,7 +32,7 @@ const listTvShows = async (genreId) => {
 
 <template>
   <div class="container">
-    <h1>Gêneros de programas de TV</h1>
+    <h1>Series</h1>
     <ul class="genre-list">
       <li v-for="genre in genreStore.genres" :key="genre.id" class="genre-item" :class="{ active: genre.id === genreStore.currentGenreId }" @click="listTvShows(genre.id)">
         {{ genre.name }}
